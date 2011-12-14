@@ -4,7 +4,14 @@ __author__ = "Eduardo Lopez Biagi"
 __license__ = "MIT License"
 
 """
-Use a probabilistic letter model to break a rotation cipher.
+Use a probabilistic letter model to 'break' a rotation cipher.
+
+This solution uses a very simple model (but it's enough to decode the message):
+    * 2 letter bigrams built from a list of words (around 260,000 words).
+    * Naïve Bayes assumption: P(bg_1, bg_2... bg_n) = Product(i:1..n) P(bg_i).
+
+Requirements:
+    * Python 3.x
 """
 
 import functools
@@ -16,6 +23,8 @@ import time
 # Logging level
 logging.basicConfig(level=logging.INFO)
 
+
+# Text we're trying to decode
 TEXT = "Esp qtcde nzyqpcpynp zy esp ezatn zq Lcetqtntlw \
 Tyepwwtrpynp hld spwo le Olcexzfes Nzwwprp ty estd jplc."
 
