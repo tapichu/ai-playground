@@ -59,12 +59,14 @@ class TestDecoder(unittest.TestCase):
     def setUp(self):
         rotation_cipher = rcplm.RotationCipher()
         self.phrase = "hello world goodbye by the way nice to be here"
-        self.phrases = [rotation_cipher.cipher(self.phrase, x) for x in range(0, len(self.phrase))]
+        start_phrase = rotation_cipher.cipher(self.phrase, 5)
+        self.phrases = [rotation_cipher.cipher(start_phrase, x) for x in range(0, len(start_phrase))]
 
     def test_most_probable(self):
-        phrase, probability = rcplm.most_probable(self.phrases)
+        phrase, best_p, second_best_p = rcplm.most_probable(self.phrases)
         self.assertEqual(phrase, self.phrase)
-        self.assertEqual(probability, 2.9213352036946953e-103)
+        self.assertEqual(best_p, 1.238846979062753e-70)
+        self.assertEqual(second_best_p, 1.0406309896340022e-86)
 
 if __name__ == '__main__':
     unittest.main()
