@@ -27,11 +27,13 @@ class TestRotationCipher(unittest.TestCase):
         self.assertEqual(self.rc.cipher("abcd", 5), "fghi")
         self.assertEqual(self.rc.cipher("abcd", 25), "zabc")
         self.assertEqual(self.rc.cipher("abcd", 26), "abcd")
+        self.assertEqual(self.rc.cipher("ab cd", 1), "bc de")
 
 class TestLetterBigrams(unittest.TestCase):
 
-    def setUp(self):
-        self.lng = rcplm.LetterBigrams()
+    @classmethod
+    def setUpClass(klass):
+        klass.lng = rcplm.LetterBigrams()
 
     def test_init(self):
         self.assertEqual(len(self.lng.words), 267751)
@@ -40,9 +42,12 @@ class TestLetterBigrams(unittest.TestCase):
         self.assertEqual(self.lng.words[0], "aa")
 
     def test_build_probabilistic_model(self):
-        self.assertEqual(self.lng.bigrams['aa'], {"count": 194, "p": 0})
-        self.assertEqual(self.lng.bigrams['za'], {"count": 1729, "p": 0})
+        self.assertEqual(self.lng.bigrams['aa'], {"count": 194, "p": 9.025973158782064e-05})
+        self.assertEqual(self.lng.bigrams['za'], {"count": 1729, "p": 0.0007971407927475385})
         self.assertEqual(self.lng.bigrams_count, 2171509)
+
+    def test_probability(self):
+        self.assertEqual(self.lng.probability("za"), 0.0007971407927475385)
 
 if __name__ == '__main__':
     unittest.main()
