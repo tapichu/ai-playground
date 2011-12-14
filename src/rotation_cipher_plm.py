@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 __author__ = "Eduardo Lopez Biagi"
-__license__ = "MIT License"
+__license__ = "BSD-new"
 
 """
 Use a probabilistic letter model to 'break' a rotation cipher.
