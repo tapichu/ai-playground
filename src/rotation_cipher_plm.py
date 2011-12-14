@@ -86,7 +86,6 @@ class LetterBigrams:
         # TODO: could make it generic, for N-grams, with itertools.permutations
         self.bigrams = [x + y for x in self.alphabet for y in self.alphabet]
         self.bigrams = dict([(x, {"count": words.count(x), "p": 0}) for x in self.bigrams])
-        self.__bigrams_count = functools.reduce(lambda v,e: v + e['count'], self.bigrams.values(), 0)
 
         self.calculate_probabilities()
 
@@ -94,8 +93,10 @@ class LetterBigrams:
 
     def calculate_probabilities(self, k=2):
         """Use Laplacian smoothing to calculate the probabilities"""
+        bigrams_count = functools.reduce(lambda v,e: v + e['count'], self.bigrams.values(), 0)
+
         for bigram in self.bigrams.values():
-            bigram["p"] = (bigram["count"] + k) / (self.__bigrams_count + k)
+            bigram["p"] = (bigram["count"] + k) / (bigrams_count + k)
 
     def probability(self, bigram):
         """Get the probability of the specified bigram"""
