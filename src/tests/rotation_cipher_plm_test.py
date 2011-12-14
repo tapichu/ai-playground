@@ -27,7 +27,11 @@ class TestRotationCipher(unittest.TestCase):
         self.assertEqual(self.rc.cipher("abcd", 5), "fghi")
         self.assertEqual(self.rc.cipher("abcd", 25), "zabc")
         self.assertEqual(self.rc.cipher("abcd", 26), "abcd")
+
+    def test_cipher_special_chars(self):
         self.assertEqual(self.rc.cipher("ab cd", 1), "bc de")
+        self.assertEqual(self.rc.cipher("ab cd!", 1), "bc de!")
+
 
 class TestLetterBigrams(unittest.TestCase):
 
@@ -48,6 +52,19 @@ class TestLetterBigrams(unittest.TestCase):
 
     def test_probability(self):
         self.assertEqual(self.lng.probability("za"), 0.0007971407927475385)
+
+
+class TestDecoder(unittest.TestCase):
+
+    def setUp(self):
+        rotation_cipher = rcplm.RotationCipher()
+        self.phrase = "hello world goodbye by the way nice to be here"
+        self.phrases = [rotation_cipher.cipher(self.phrase, x) for x in range(0, len(self.phrase))]
+
+    def test_most_probable(self):
+        phrase, probability = rcplm.most_probable(self.phrases)
+        self.assertEqual(phrase, self.phrase)
+        self.assertEqual(probability, 2.9213352036946953e-103)
 
 if __name__ == '__main__':
     unittest.main()

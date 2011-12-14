@@ -24,6 +24,7 @@ ALPHABET_EN = [
     "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"
 ]
 
+
 class RotationCipher:
     """Rotates character strings"""
 
@@ -41,6 +42,7 @@ class RotationCipher:
         """Map a string to another by a shift of size N"""
         return "".join([self.rotate_char(c, shift) for c in text.lower()])
 
+
 class LetterBigrams:
     """Create letter bigrams from a word list"""
 
@@ -48,6 +50,7 @@ class LetterBigrams:
         self.alphabet = alphabet
 
         self.words = []
+        # TODO: get a better corpus, not just words, but real texts
         with open(os.path.join(os.path.dirname(__file__), "sowpods.txt")) as f:
             for line in iter(f.readline, ''):
                 self.words.append(line.lower().rstrip())
@@ -65,6 +68,7 @@ class LetterBigrams:
         self.bigrams_count = functools.reduce(lambda v,e: v + e['count'], self.bigrams.values(), 0)
 
         self.calculate_probabilities()
+        # TODO: store probabilistic model on disk to avoid computing it each time
 
         logging.debug('Built probabilistic model in: %f', (time.time() - start_time))
 
@@ -100,7 +104,7 @@ def most_probable(phrases):
     return (best_phrase, probability)
 
 def main():
-    # Text cleanup, remove punctuation characters, etc.
+    # Text cleanup: remove punctuation characters, etc.
     text = re.sub("[^a-z ]", "", TEXT.lower())
 
     rotation_cipher = RotationCipher()
