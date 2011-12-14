@@ -17,6 +17,7 @@ Requirements:
 
 from rotation_cipher_plm import TEXT, RotationCipher
 import logging
+import os.path
 import re
 import subprocess
 
@@ -43,8 +44,9 @@ def most_probable(phrases):
     """
     idx = 0
     command = "("
+    text_en = os.path.join(os.path.dirname(__file__), "text_en.txt")
     for phrase in phrases:
-        command += 'echo `echo "%s $(cat text_en.txt)" | gzip | wc -c` %i; ' % (phrase, idx)
+        command += 'echo `echo "%s $(cat %s)" | gzip | wc -c` %i; ' % (phrase, text_en, idx)
         idx += 1
     command += ") | sort -n | head -1 | cut -d ' ' -f 2"
     logging.debug("Command: %s", command)
