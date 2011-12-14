@@ -39,9 +39,10 @@ class TestLetterBigrams(unittest.TestCase):
     def test_init_lowercase(self):
         self.assertEqual(self.lng.words[0], "aa")
 
-    def test_init_bigrams(self):
-        self.assertEqual(self.lng.bigrams['aa'], {"count": 0, "p": 0})
-        self.assertEqual(self.lng.bigrams['za'], {"count": 0, "p": 0})
+    def test_build_probabilistic_model(self):
+        self.assertEqual(self.lng.bigrams['aa'], {"count": 194, "p": 0})
+        self.assertEqual(self.lng.bigrams['za'], {"count": 1729, "p": 0})
+        self.assertEqual(self.lng.bigrams_count, 2171509)
 
 if __name__ == '__main__':
     unittest.main()
