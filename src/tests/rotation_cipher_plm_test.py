@@ -36,24 +36,49 @@ class TestRotationCipher(unittest.TestCase):
 
 class TestLetterBigrams(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(klass):
-        klass.lng = rcplm.LetterBigrams()
+    def setUp(self):
+        self.lbg = rcplm.LetterBigrams()
 
     def test_init(self):
-        self.assertEqual(len(self.lng.words), 267751)
+        self.assertEqual(len(self.lbg.words), 267751)
 
     def test_init_lowercase(self):
-        self.assertEqual(self.lng.words[0], "aa")
+        self.assertEqual(self.lbg.words[0], "aa")
 
     def test_build_probabilistic_model(self):
-        self.assertEqual(self.lng.bigrams['aa'], {"count": 194, "p": 9.025973158782064e-05})
-        self.assertEqual(self.lng.bigrams['za'], {"count": 1729, "p": 0.0007971407927475385})
-        bigrams_count = functools.reduce(lambda v,e: v + e['count'], self.lng.bigrams.values(), 0)
+        self.assertEqual(self.lbg.bigrams['aa'], {"count": 194, "p": 9.025973158782064e-05})
+        self.assertEqual(self.lbg.bigrams['za'], {"count": 1729, "p": 0.0007971407927475385})
+        bigrams_count = functools.reduce(lambda v,e: v + e['count'], self.lbg.bigrams.values(), 0)
         self.assertEqual(bigrams_count, 2171509)
 
+    def test_calculate_probabilities(self):
+        self.lbg.bigrams = {
+            "aa": {"count": 10, "p": 0},
+            "ab": {"count": 5, "p": 0},
+            "ac": {"count": 0, "p": 0}
+        }
+        k = 2
+        self.lbg.calculate_probabilities(k)
+
+        self.assertEqual(self.lbg.probability("aa"), (10 + k) / (15 + k))
+        self.assertEqual(self.lbg.probability("ab"), (5 + k) / (15 + k))
+        self.assertEqual(self.lbg.probability("ac"), (0 + k) / (15 + k))
+
+    def test_calculate_probabilities(self):
+        self.lbg.bigrams = {
+            "aa": {"count": 10, "p": 0},
+            "ab": {"count": 5, "p": 0},
+            "ac": {"count": 0, "p": 0}
+        }
+        # Maximum likelihood
+        self.lbg.calculate_probabilities(0)
+
+        self.assertEqual(self.lbg.probability("aa"), 10/15)
+        self.assertEqual(self.lbg.probability("ab"), 5/15)
+        self.assertEqual(self.lbg.probability("ac"), 0)
+
     def test_probability(self):
-        self.assertEqual(self.lng.probability("za"), 0.0007971407927475385)
+        self.assertEqual(self.lbg.probability("za"), 0.0007971407927475385)
 
 
 class TestDecoder(unittest.TestCase):
