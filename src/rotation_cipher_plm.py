@@ -58,9 +58,11 @@ class LetterBigrams:
 
     def __init__(self, alphabet=ALPHABET_EN):
         self.alphabet = alphabet
-        self.__words_file = os.path.join(os.path.dirname(__file__), "sowpods.txt")
-        self.__words_p = os.path.join(os.path.dirname(__file__), ".words.p")
-        self.__prob_model_p = os.path.join(os.path.dirname(__file__), ".prob_model.p")
+
+        cwd = os.path.dirname(__file__)
+        self.__words_file = os.path.join(cwd, "sowpods.txt")
+        self.__words_p = os.path.join(cwd, ".words.p")
+        self.__prob_model_p = os.path.join(cwd, ".prob_letter_model.p")
 
         if os.path.isfile(self.__words_p):
             self.words = pickle.load(open(self.__words_p, "rb"))
