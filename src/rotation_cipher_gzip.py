@@ -35,7 +35,7 @@ def run_command(command):
         return -1
     else:
         logging.debug(stdout_value)
-        return int(stdout_value)
+        return stdout_value
 
 def most_probable(phrases):
     """
@@ -51,7 +51,7 @@ def most_probable(phrases):
     command += ") | sort -n | head -1 | cut -d ' ' -f 2"
     logging.debug("Command: %s", command)
 
-    best_idx = run_command(command)
+    best_idx = int(run_command(command))
     return phrases[best_idx] if best_idx >= 0 else "An error occurred"
 
 def main():

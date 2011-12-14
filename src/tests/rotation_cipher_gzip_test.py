@@ -15,7 +15,7 @@ piss, I only mean that you shine out like a shaft of gold when all around it is 
         self.encoded_phrase = self.rc.encode(self.phrase, 5)
 
     def test_run_command(self):
-        self.assertEqual(rcgzip.run_command('echo "10"'), 10)
+        self.assertEqual(int(rcgzip.run_command('echo "10"')), 10)
 
     def test_run_command_error(self):
         self.assertEqual(rcgzip.run_command('not_found'), -1)
