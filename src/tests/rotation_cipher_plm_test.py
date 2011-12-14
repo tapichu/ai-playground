@@ -28,5 +28,20 @@ class TestRotationCipher(unittest.TestCase):
         self.assertEqual(self.rc.cipher("abcd", 25), "zabc")
         self.assertEqual(self.rc.cipher("abcd", 26), "abcd")
 
+class TestLetterBigrams(unittest.TestCase):
+
+    def setUp(self):
+        self.lng = rcplm.LetterBigrams()
+
+    def test_init(self):
+        self.assertEqual(len(self.lng.words), 267751)
+
+    def test_init_lowercase(self):
+        self.assertEqual(self.lng.words[0], "aa")
+
+    def test_init_bigrams(self):
+        self.assertEqual(self.lng.bigrams['aa'], {"count": 0, "p": 0})
+        self.assertEqual(self.lng.bigrams['za'], {"count": 0, "p": 0})
+
 if __name__ == '__main__':
     unittest.main()
