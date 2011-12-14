@@ -12,7 +12,7 @@ class TestRotationCipherGzip(unittest.TestCase):
         self.rc = rcgzip.RotationCipher()
         self.phrase = "Your highness, when I said that you are like a stream of bat's \
 piss, I only mean that you shine out like a shaft of gold when all around it is dark"
-        self.encoded_phrase = self.rc.cipher(self.phrase, 5)
+        self.encoded_phrase = self.rc.encode(self.phrase, 5)
 
     def test_run_command(self):
         self.assertEqual(rcgzip.run_command('echo "10"'), 10)
@@ -21,7 +21,7 @@ piss, I only mean that you shine out like a shaft of gold when all around it is 
         self.assertEqual(rcgzip.run_command('not_found'), -1)
 
     def test_most_probable(self):
-        phrases = [self.rc.cipher(self.encoded_phrase, x) for x in range(0, 26)]
+        phrases = [self.rc.encode(self.encoded_phrase, x) for x in range(0, 26)]
         phrase = rcgzip.most_probable(phrases)
         self.assertEqual(phrase, self.phrase.lower())
 

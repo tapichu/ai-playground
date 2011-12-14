@@ -59,7 +59,7 @@ def main():
     text = re.sub("[^a-z ]", "", TEXT.lower())
 
     rotation_cipher = RotationCipher()
-    all_phrases = [rotation_cipher.cipher(text, x) for x in range(0, 26)]
+    all_phrases = [rotation_cipher.encode(text, x) for x in range(0, 26)]
 
     # Figure out the probability of each possible shift
     phrase = most_probable(all_phrases)

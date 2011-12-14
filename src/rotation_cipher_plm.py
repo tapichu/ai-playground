@@ -48,7 +48,7 @@ class RotationCipher:
             char = self.alphabet[(self.alphabet.index(char) + shift) % len(self.alphabet)]
         return char
 
-    def cipher(self, text="", shift=0):
+    def encode(self, text="", shift=0):
         """Map a string to another by a shift of size N"""
         return "".join([self.rotate_char(c, shift) for c in text.lower()])
 
@@ -134,7 +134,7 @@ def main():
     text = re.sub("[^a-z ]", "", TEXT.lower())
 
     rotation_cipher = RotationCipher()
-    all_phrases = (rotation_cipher.cipher(text, x) for x in range(0, 26))
+    all_phrases = (rotation_cipher.encode(text, x) for x in range(0, 26))
 
     # Figure out the probability of each possible shift
     phrase, best_p, second_best_p = most_probable(all_phrases)

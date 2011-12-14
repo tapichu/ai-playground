@@ -22,16 +22,16 @@ class TestRotationCipher(unittest.TestCase):
         self.assertEqual(self.rc.rotate_char("a", 25), "z")
         self.assertEqual(self.rc.rotate_char("a", 26), "a")
 
-    def test_cipher(self):
-        self.assertEqual(self.rc.cipher("abcd"), "abcd")
-        self.assertEqual(self.rc.cipher("abcd", 1), "bcde")
-        self.assertEqual(self.rc.cipher("abcd", 5), "fghi")
-        self.assertEqual(self.rc.cipher("abcd", 25), "zabc")
-        self.assertEqual(self.rc.cipher("abcd", 26), "abcd")
+    def test_encode(self):
+        self.assertEqual(self.rc.encode("abcd"), "abcd")
+        self.assertEqual(self.rc.encode("abcd", 1), "bcde")
+        self.assertEqual(self.rc.encode("abcd", 5), "fghi")
+        self.assertEqual(self.rc.encode("abcd", 25), "zabc")
+        self.assertEqual(self.rc.encode("abcd", 26), "abcd")
 
-    def test_cipher_special_chars(self):
-        self.assertEqual(self.rc.cipher("ab cd", 1), "bc de")
-        self.assertEqual(self.rc.cipher("ab cd!", 1), "bc de!")
+    def test_encode_special_chars(self):
+        self.assertEqual(self.rc.encode("ab cd", 1), "bc de")
+        self.assertEqual(self.rc.encode("ab cd!", 1), "bc de!")
 
 
 class TestLetterBigrams(unittest.TestCase):
@@ -62,8 +62,8 @@ class TestDecoder(unittest.TestCase):
         rotation_cipher = rcplm.RotationCipher()
         self.phrase = "Tonight instead of discussing the existence or non existence \
 of God they have decided to fight for it"
-        encoded_phrase = rotation_cipher.cipher(self.phrase, 5)
-        self.phrases = [rotation_cipher.cipher(encoded_phrase, x) for x in range(0, 26)]
+        encoded_phrase = rotation_cipher.encode(self.phrase, 5)
+        self.phrases = [rotation_cipher.encode(encoded_phrase, x) for x in range(0, 26)]
 
     def test_most_probable(self):
         phrase, best_p, second_best_p = rcplm.most_probable(self.phrases)
