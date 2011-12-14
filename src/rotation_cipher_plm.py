@@ -16,7 +16,8 @@ Requirements:
 
 import functools
 import logging
-import os
+import os.path
+import pickle
 import re
 import time
 
@@ -57,14 +58,25 @@ class LetterBigrams:
 
     def __init__(self, alphabet=ALPHABET_EN):
         self.alphabet = alphabet
+        self.__words_file = os.path.join(os.path.dirname(__file__), "sowpods.txt")
+        self.__words_p = os.path.join(os.path.dirname(__file__), ".words.p")
+        self.__prob_model_p = os.path.join(os.path.dirname(__file__), ".prob_model.p")
 
-        self.words = []
-        # TODO: get a better corpus, not just words, but real texts
-        with open(os.path.join(os.path.dirname(__file__), "sowpods.txt")) as f:
-            for line in iter(f.readline, ''):
-                self.words.append(line.lower().rstrip())
+        if os.path.isfile(self.__words_p):
+            self.words = pickle.load(open(self.__words_p, "rb"))
+        else:
+            self.words = []
+            # TODO: get a better corpus, not just words, but real texts
+            with open(self.__words_file, "r") as f:
+                for line in iter(f.readline, ''):
+                    self.words.append(line.lower().rstrip())
+                pickle.dump(self.words, open(self.__words_p, "wb"))
 
-        self.build_probabilistic_model()
+        if os.path.isfile(self.__prob_model_p):
+            self.bigrams = pickle.load(open(self.__prob_model_p, "rb"))
+        else:
+            self.build_probabilistic_model()
+            pickle.dump(self.bigrams, open(self.__prob_model_p, "wb"))
 
     def build_probabilistic_model(self):
         """Create letter bigrams, count their ocurrences and calculate their probabilities"""
@@ -74,17 +86,16 @@ class LetterBigrams:
         # TODO: could make it generic, for N-grams, with itertools.permutations
         self.bigrams = [x + y for x in self.alphabet for y in self.alphabet]
         self.bigrams = dict([(x, {"count": words.count(x), "p": 0}) for x in self.bigrams])
-        self.bigrams_count = functools.reduce(lambda v,e: v + e['count'], self.bigrams.values(), 0)
+        self.__bigrams_count = functools.reduce(lambda v,e: v + e['count'], self.bigrams.values(), 0)
 
         self.calculate_probabilities()
-        # TODO: store probabilistic model on disk to avoid computing it each time
 
         logging.debug('Built probabilistic model in: %f', (time.time() - start_time))
 
     def calculate_probabilities(self, k=2):
         """Use Laplacian smoothing to calculate the probabilities"""
         for bigram in self.bigrams.values():
-            bigram["p"] = (bigram["count"] + k) / (self.bigrams_count + k)
+            bigram["p"] = (bigram["count"] + k) / (self.__bigrams_count + k)
 
     def probability(self, bigram):
         """Get the probability of the specified bigram"""

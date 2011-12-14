@@ -5,6 +5,7 @@ __license__ = "BSD-new"
 
 from .. import rotation_cipher_plm as rcplm
 import unittest
+import functools
 
 class TestRotationCipher(unittest.TestCase):
 
@@ -48,7 +49,8 @@ class TestLetterBigrams(unittest.TestCase):
     def test_build_probabilistic_model(self):
         self.assertEqual(self.lng.bigrams['aa'], {"count": 194, "p": 9.025973158782064e-05})
         self.assertEqual(self.lng.bigrams['za'], {"count": 1729, "p": 0.0007971407927475385})
-        self.assertEqual(self.lng.bigrams_count, 2171509)
+        bigrams_count = functools.reduce(lambda v,e: v + e['count'], self.lng.bigrams.values(), 0)
+        self.assertEqual(bigrams_count, 2171509)
 
     def test_probability(self):
         self.assertEqual(self.lng.probability("za"), 0.0007971407927475385)
