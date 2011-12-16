@@ -46,8 +46,8 @@ class TestLetterBigrams(unittest.TestCase):
         self.assertEqual(self.lbg.words[0], "aa")
 
     def test_build_probabilistic_model(self):
-        self.assertEqual(self.lbg.bigrams['aa'], {"count": 194, "p": 9.025973158782064e-05})
-        self.assertEqual(self.lbg.bigrams['za'], {"count": 1729, "p": 0.0007971407927475385})
+        self.assertEqual(self.lbg.bigrams['aa'], {"count": 194, "p": 8.977135925347058e-05})
+        self.assertEqual(self.lbg.bigrams['za'], {"count": 1729, "p": 0.0007964330846589955})
         bigrams_count = functools.reduce(lambda v,e: v + e['count'], self.lbg.bigrams.values(), 0)
         self.assertEqual(bigrams_count, 2171509)
 
@@ -60,11 +60,11 @@ class TestLetterBigrams(unittest.TestCase):
         k = 2
         self.lbg.calculate_probabilities(k)
 
-        self.assertEqual(self.lbg.probability("aa"), (10 + k) / (15 + k))
-        self.assertEqual(self.lbg.probability("ab"), (5 + k) / (15 + k))
-        self.assertEqual(self.lbg.probability("ac"), (0 + k) / (15 + k))
+        self.assertEqual(self.lbg.probability("aa"), (10 + k) / (15 + k * 3))
+        self.assertEqual(self.lbg.probability("ab"), (5 + k) / (15 + k * 3))
+        self.assertEqual(self.lbg.probability("ac"), (0 + k) / (15 + k * 3))
 
-    def test_calculate_probabilities(self):
+    def test_calculate_probabilities_ml(self):
         self.lbg.bigrams = {
             "aa": {"count": 10, "p": 0},
             "ab": {"count": 5, "p": 0},
@@ -78,7 +78,7 @@ class TestLetterBigrams(unittest.TestCase):
         self.assertEqual(self.lbg.probability("ac"), 0)
 
     def test_probability(self):
-        self.assertEqual(self.lbg.probability("za"), 0.0007971407927475385)
+        self.assertEqual(self.lbg.probability("za"), 0.0007964330846589955)
 
 
 class TestDecoder(unittest.TestCase):
@@ -93,8 +93,8 @@ of God they have decided to fight for it"
     def test_most_probable(self):
         phrase, best_p, second_best_p = rcplm.most_probable(self.phrases)
         self.assertEqual(phrase, self.phrase.lower())
-        self.assertEqual(best_p, 2.3852979238833054e-156)
-        self.assertEqual(second_best_p, 2.3543957084256302e-213)
+        self.assertEqual(best_p, 2.3102527364450072e-156)
+        self.assertEqual(second_best_p, 2.7518911947067603e-214)
 
 if __name__ == '__main__':
     unittest.main()
