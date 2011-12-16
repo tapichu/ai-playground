@@ -7,7 +7,7 @@ __license__ = "BSD-new"
 Use a probabilistic letter model to 'break' a rotation cipher.
 
 This solution uses a very simple model (but it's enough to decode the message):
-    * 2 letter bigrams built from a list of words (around 260,000 words).
+    * 2 letter bigram probabilities built from a list of words (around 260,000 words).
     * Naïve Bayes assumption: P(bg_1, bg_2... bg_n) = Product(i:1..n) P(bg_i).
 
 Requirements:
@@ -87,18 +87,18 @@ class LetterBigrams:
         words = ' '.join(self.words)
         # TODO: could make it generic, for N-grams, with itertools.permutations
         self.bigrams = [x + y for x in self.alphabet for y in self.alphabet]
-        self.bigrams = dict([(x, {"count": words.count(x), "p": 0}) for x in self.bigrams])
+        self.bigrams = dict([(bi, {"count": words.count(bi), "p": 0}) for bi in self.bigrams])
 
         self.calculate_probabilities()
-
         logging.debug('Built probabilistic model in: %f', (time.time() - start_time))
 
-    def calculate_probabilities(self, k=2):
-        """Use Laplacian smoothing to calculate the probabilities"""
+    def calculate_probabilities(self, k=1):
+        """Use Laplace smoothing to calculate the probabilities"""
         bigrams_count = functools.reduce(lambda v,e: v + e['count'], self.bigrams.values(), 0)
+        num_bigrams = len(self.bigrams)
 
         for bigram in self.bigrams.values():
-            bigram["p"] = (bigram["count"] + k) / (bigrams_count + k)
+            bigram["p"] = (bigram["count"] + k) / (bigrams_count + k * num_bigrams)
 
     def probability(self, bigram):
         """Get the probability of the specified bigram"""
