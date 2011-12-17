@@ -7,18 +7,21 @@ __license__ = "BSD-new"
 Use a probabilistic word model to reorder a shuffled text.
 
 This solution uses the following probabilistic model:
-    * 2 word bigrams.
-    * Markov assumption: P(w_1, w_2... w_n) = Product(i:1..n) P(w_i|w_i-1).
+    * Word unigrams.
+    * Naïve Bayes assumption: P(w_1, w_2... w_n) = Product(i:1..n) P(w_i).
 
 Requirements:
     * Python 3.x
 """
 
+import functools
 import logging
 import os.path
+import pickle
+import time
 
 # Logging level
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 
 # The text we want to reorder
@@ -34,23 +37,44 @@ TEXT = """
 """
 
 
-class TwoWordBigrams:
-    """Probabilistic word model for 2 word bigrams"""
+class WordUnigrams:
+    """Probabilistic model for word unigrams"""
 
-    def __init__(self):
+    def __init__(self, word_file="count_1w.txt"):
         cwd = os.path.dirname(__file__)
-        self.__words_file = os.path.join(cwd, "count_2w.txt")
-        self.__word_counts_p = os.path.join(cwd, ".word_counts.p")
+        self.__words_file = os.path.join(cwd, word_file)
         self.__prob_word_model_p = os.path.join(cwd, ".prob_word_model.p")
 
+        self.build_probabilistic_model()
+
     def build_probabilistic_model(self):
-        pass
+        """Create word unigrams, count their ocurrences and calculate their probabilities"""
+        start_time = time.time()
 
-    def calculate_probabilities(self, k=2):
-        pass
+        if os.path.isfile(self.__prob_word_model_p):
+            self.unigrams = pickle.load(open(self.__prob_word_model_p, "rb"))
+        else:
+            self.unigrams = {}
+            with open(self.__words_file, "r") as f:
+                for line in iter(f.readline, ''):
+                    parts = line.split("\t")
+                    self.unigrams[parts[0]] = {'count': int(parts[1]), 'p': 0}
+                self.calculate_probabilities()
+                pickle.dump(self.unigrams, open(self.__prob_word_model_p, "wb"))
 
-    def probability(self, bigram):
-        pass
+        logging.debug('Built probabilistic model in: %f', (time.time() - start_time))
+
+    def calculate_probabilities(self, k=1):
+        """Use Laplace smoothing to calculate the probabilities"""
+        unigrams_count = functools.reduce(lambda v,e: v + e['count'], self.unigrams.values(), 0)
+        num_unigrams = len(self.unigrams)
+
+        for unigram in self.unigrams.values():
+            unigram["p"] = (unigram["count"] + k) / (unigrams_count + k * num_unigrams)
+
+    def probability(self, unigram):
+        """Get the probability of the specified unigram"""
+        return self.unigrams[unigram]["p"]
 
 
 def main():
