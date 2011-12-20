@@ -66,6 +66,11 @@ class ShuffledText:
     def append_column(self, column):
         self.columns.append(column)
 
+    def remove_column(self, n=0):
+        column = self.columns[n]
+        del self.columns[n]
+        return column
+
     def calculate_probability(self):
         text = str(self).replace('\n', '')
         text = re.sub("[^a-z ]", "", text.lower())
@@ -138,9 +143,7 @@ class WordUnigrams:
 
 
 def main():
-    sft = ShuffledText()
-    print(sft)
-    print(TEXT)
+    start_text = ShuffledText()
 
 if __name__ == "__main__":
     main()

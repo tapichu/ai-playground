@@ -17,9 +17,8 @@ th|is| c|la|ss|
 
 class TestSuffledText(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(klass):
-        klass.st = shuffle_pwm.ShuffledText(text=TEST_TEXT, cols=5, rows=3)
+    def setUp(self):
+        self.st = shuffle_pwm.ShuffledText(text=TEST_TEXT, cols=5, rows=3)
 
     def test_process_text(self):
         self.assertEquals(self.st.columns[0], ["th", "te", "th"])
@@ -38,16 +37,18 @@ class TestSuffledText(unittest.TestCase):
         self.st.append_column(column)
         self.assertEquals(self.st.column(5), column)
 
+    def test_remove_column(self):
+        self.assertEquals(self.st.remove_column(4), ["a ", "  ", "ss"])
+        self.assertEquals(len(self.st.columns), 4)
+
     def test_calculate_probability(self):
         self.assertEquals(self.st.calculate_probability(), 5.468530120326781e-30)
 
 
 class TestWordUnigrams(unittest.TestCase):
 
-    @classmethod
-    def setUpClass(klass):
-        klass.wug = shuffle_pwm.WordUnigrams()
-        klass.original_unigrams = klass.wug.unigrams
+    def setUp(self):
+        self.wug = shuffle_pwm.WordUnigrams()
 
     def test_build_probabilistic_model(self):
         self.assertEquals(len(self.wug.unigrams), 333333)
@@ -67,8 +68,6 @@ class TestWordUnigrams(unittest.TestCase):
         self.assertEqual(self.wug.probability("silly"), (5 + k) / (15 + k * 3))
         self.assertEqual(self.wug.probability("walks"), (0 + k) / (15 + k * 3))
 
-        self.wug.unigrams = self.original_unigrams
-
     def test_calculate_probabilities_ml(self):
         self.wug.unigrams = {
             "ministry": {"count": 10, "p": 0},
@@ -82,13 +81,11 @@ class TestWordUnigrams(unittest.TestCase):
         self.assertEqual(self.wug.probability("silly"), 5/15)
         self.assertEqual(self.wug.probability("walks"), 0)
 
-        self.wug.unigrams = self.original_unigrams
-
     def test_probability(self):
         self.assertEqual(self.wug.probability("parrot"), 4.561720785066264e-06)
 
     def test_probability_not_found(self):
-        self.assertEqual(self.wug.probability("paarroott"), 2.9998680058077443e-06)
+        self.assertEqual(self.wug.probability("paarroott"), 1.7003201005890219e-12)
 
 if __name__ == '__main__':
     unittest.main()
