@@ -60,7 +60,7 @@ class TestWordUnigrams(unittest.TestCase):
 
     def setUp(self):
         self.wug = shuffle_pwm.WordUnigrams()
-        self.wug.calculate_probabilities()
+        self.orig_model = self.wug.model
 
     def test_build_probabilistic_model(self):
         self.assertEquals(len(self.wug.model), 333333)
@@ -81,6 +81,10 @@ class TestWordUnigrams(unittest.TestCase):
         self.assertEqual(self.wug.probability("walks"), (0 + k) / (15 + k * 3))
         self.assertEqual(self.wug.probability("none"), k / (15 + k * 3))
 
+        # Cleanup
+        self.wug.model = self.orig_model
+        self.wug.calculate_probabilities()
+
     def test_calculate_probabilities_ml(self):
         self.wug.model = {
             "ministry": {"count": 10, "p": 0},
@@ -94,6 +98,10 @@ class TestWordUnigrams(unittest.TestCase):
         self.assertEqual(self.wug.probability("silly"), 5/15)
         self.assertEqual(self.wug.probability("walks"), 0)
         self.assertEqual(self.wug.probability("none"), 0)
+
+        # Cleanup
+        self.wug.model = self.orig_model
+        self.wug.calculate_probabilities()
 
     def test_probability(self):
         self.assertEqual(self.wug.probability("parrot"), 4.561720785066264e-06)
