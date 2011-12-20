@@ -28,6 +28,10 @@ Decode the message (split in 2 letter columns):
 |hi|  |  |in|  |  | t|  |  |  |  |ye|  |ar|  |s |  |  |. |
 ```
 
+#### Solutions
+
+* __Using a probabilistic word model__: `src/shuffle_pwd.py`
+
 ### Word list
 
 From Peter Norvig's ["Natural Language Corpus Data: Beautiful Data"](http://norvig.com/ngrams/) (MIT license).
