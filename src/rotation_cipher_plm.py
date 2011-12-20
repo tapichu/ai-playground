@@ -80,8 +80,8 @@ class LetterBigrams(ProbabilisticModel):
 
         words = ' '.join(self.words)
         # TODO: could make it generic, for N-grams, with itertools.permutations
-        self.model = [x + y for x in self.alphabet for y in self.alphabet]
-        self.model = dict([(bi, {"count": words.count(bi), "p": 0}) for bi in self.model])
+        self.model = dict([(x+y, {"count": words.count(x+y), "p": 0})
+            for x in self.alphabet for y in self.alphabet])
 
         self.calculate_probabilities()
         logging.debug('Built probabilistic model in: %f', (time.time() - start_time))
