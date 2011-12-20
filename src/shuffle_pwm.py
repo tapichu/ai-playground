@@ -143,22 +143,20 @@ class WordUnigrams:
         except KeyError:
             return self.default_prob["p"]
 
-
-def main():
+def most_probable(text=TEXT, cols=19, rows=8):
     word_model = WordUnigrams()
-    cols = 19
     results = []
 
     # Pick admissible columns for the first one, figure out the best order for
     # each, and choose the one with the highest probability
     for i in range(cols):
-        shuffled_text = ShuffledText(unigrams=word_model)
+        shuffled_text = ShuffledText(text=text, unigrams=word_model, cols=cols, rows=rows)
         start_col = shuffled_text.remove_column(i)
         if [r for r in start_col if r.startswith(' ')]:
             results.append((float("-inf"), None))
             continue
 
-        ordered_text = ShuffledText(columns=[start_col], cols=1, rows=8,
+        ordered_text = ShuffledText(columns=[start_col], cols=1, rows=rows,
                 text=None, unigrams=word_model)
 
         for j in range(1, cols):
@@ -179,9 +177,13 @@ def main():
 
         results.append((max_p, ordered_text))
 
-    results = sorted(results, key=lambda res: res[0], reverse=True)
-    logging.debug(results)
-    print(results[0][1])
+    return sorted(results, key=lambda res: res[0], reverse=True)
+
+def main():
+    sorted_results = most_probable()
+    logging.debug(sorted_results)
+
+    print(sorted_results[0][1])
 
 if __name__ == "__main__":
     main()
