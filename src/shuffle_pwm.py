@@ -42,14 +42,15 @@ TEXT = """
 class ShuffledText:
     """Represents text split into columns."""
 
-    def __init__(self, text=TEXT, cols=19, rows=8):
-        self.original_text = text
-        self.columns = []
+    def __init__(self, text=TEXT, cols=19, rows=8, columns=None, unigrams=None):
         self.__cols = cols
         self.__rows = rows
-        self.process_text(text)
+        self.columns = columns if columns else []
+        self.unigrams = unigrams if unigrams else WordUnigrams()
 
-        self.unigrams = WordUnigrams()
+        if text:
+            self.original_text = text
+            self.process_text(text)
 
     def process_text(self, text):
         text = text.replace('\n', '')
@@ -65,10 +66,12 @@ class ShuffledText:
 
     def append_column(self, column):
         self.columns.append(column)
+        self.__cols += 1
 
     def remove_column(self, n=0):
         column = self.columns[n]
         del self.columns[n]
+        self.__cols -= 1
         return column
 
     def calculate_probability(self):
