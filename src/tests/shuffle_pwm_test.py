@@ -63,12 +63,12 @@ class TestWordUnigrams(unittest.TestCase):
         self.wug.calculate_probabilities()
 
     def test_build_probabilistic_model(self):
-        self.assertEquals(len(self.wug.unigrams), 333333)
-        self.assertEquals(self.wug.unigrams['cheese']['count'], 16704436)
-        self.assertEquals(self.wug.unigrams['shop']['count'], 212793848)
+        self.assertEquals(len(self.wug.model), 333333)
+        self.assertEquals(self.wug.model['cheese']['count'], 16704436)
+        self.assertEquals(self.wug.model['shop']['count'], 212793848)
 
     def test_calculate_probabilities(self):
-        self.wug.unigrams = {
+        self.wug.model = {
             "ministry": {"count": 10, "p": 0},
             "silly": {"count": 5, "p": 0},
             "walks": {"count": 0, "p": 0}
@@ -82,7 +82,7 @@ class TestWordUnigrams(unittest.TestCase):
         self.assertEqual(self.wug.probability("none"), k / (15 + k * 3))
 
     def test_calculate_probabilities_ml(self):
-        self.wug.unigrams = {
+        self.wug.model = {
             "ministry": {"count": 10, "p": 0},
             "silly": {"count": 5, "p": 0},
             "walks": {"count": 0, "p": 0}
@@ -100,6 +100,7 @@ class TestWordUnigrams(unittest.TestCase):
 
     def test_probability_not_found(self):
         self.assertEqual(self.wug.probability("paarroott"), 1.7003201005890219e-12)
+
 
 class TestShufflePwm(unittest.TestCase):
 

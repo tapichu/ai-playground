@@ -39,20 +39,20 @@ class TestLetterBigrams(unittest.TestCase):
     def setUp(self):
         self.lbg = rcplm.LetterBigrams()
 
-    def test_init(self):
-        self.assertEqual(len(self.lbg.words), 267751)
+    def test_build_probabilistic_model(self):
+        self.lbg.build_probabilistic_model()
 
-    def test_init_lowercase(self):
+        self.assertEqual(len(self.lbg.words), 267751)
+        # Lowercase
         self.assertEqual(self.lbg.words[0], "aa")
 
-    def test_build_probabilistic_model(self):
-        self.assertEqual(self.lbg.bigrams['aa'], {"count": 194, "p": 8.977135925347058e-05})
-        self.assertEqual(self.lbg.bigrams['za'], {"count": 1729, "p": 0.0007964330846589955})
-        bigrams_count = functools.reduce(lambda v,e: v + e['count'], self.lbg.bigrams.values(), 0)
+        self.assertEqual(self.lbg.model['aa'], {"count": 194, "p": 8.977135925347058e-05})
+        self.assertEqual(self.lbg.model['za'], {"count": 1729, "p": 0.0007964330846589955})
+        bigrams_count = functools.reduce(lambda v,e: v + e['count'], self.lbg.model.values(), 0)
         self.assertEqual(bigrams_count, 2171509)
 
     def test_calculate_probabilities(self):
-        self.lbg.bigrams = {
+        self.lbg.model = {
             "aa": {"count": 10, "p": 0},
             "ab": {"count": 5, "p": 0},
             "ac": {"count": 0, "p": 0}
@@ -65,7 +65,7 @@ class TestLetterBigrams(unittest.TestCase):
         self.assertEqual(self.lbg.probability("ac"), (0 + k) / (15 + k * 3))
 
     def test_calculate_probabilities_ml(self):
-        self.lbg.bigrams = {
+        self.lbg.model = {
             "aa": {"count": 10, "p": 0},
             "ab": {"count": 5, "p": 0},
             "ac": {"count": 0, "p": 0}

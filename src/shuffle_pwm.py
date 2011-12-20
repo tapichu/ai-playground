@@ -14,6 +14,7 @@ Requirements:
     * Python 3.x
 """
 
+from probabilistic_model import ProbabilisticModel
 import functools
 import logging
 import os.path
@@ -94,43 +95,38 @@ class ShuffledText:
         return string
 
 
-class WordUnigrams:
+class WordUnigrams(ProbabilisticModel):
     """Probabilistic model for word unigrams"""
 
     def __init__(self, word_file="count_1w.txt"):
         cwd = os.path.dirname(__file__)
         self.__words_file = os.path.join(cwd, word_file)
-        self.__prob_word_model_p = os.path.join(cwd, ".prob_word_model.p")
         self.__default_prob_p = os.path.join(cwd, ".default_prob.p")
 
-        self.build_probabilistic_model()
+        if os.path.isfile(self.__default_prob_p):
+            self.default_prob = pickle.load(open(self.__default_prob_p, "rb"))
+
+        super().__init__(".prob_word_model.p")
 
     def build_probabilistic_model(self):
         """Create word unigrams, count their ocurrences and calculate their probabilities"""
         start_time = time.time()
 
-        if os.path.isfile(self.__prob_word_model_p):
-            self.unigrams = pickle.load(open(self.__prob_word_model_p, "rb"))
-        else:
-            self.unigrams = {}
-            with open(self.__words_file, "r") as f:
-                for line in iter(f.readline, ''):
-                    parts = line.split("\t")
-                    self.unigrams[parts[0]] = {'count': int(parts[1]), 'p': 0}
-                self.calculate_probabilities()
-                pickle.dump(self.unigrams, open(self.__prob_word_model_p, "wb"))
-
-        if os.path.isfile(self.__default_prob_p):
-            self.default_prob = pickle.load(open(self.__default_prob_p, "rb"))
+        self.model = {}
+        with open(self.__words_file, "r") as f:
+            for line in iter(f.readline, ''):
+                parts = line.split("\t")
+                self.model[parts[0]] = {'count': int(parts[1]), 'p': 0}
+            self.calculate_probabilities()
 
         logging.debug('Built probabilistic model in: %f', (time.time() - start_time))
 
     def calculate_probabilities(self, k=1):
         """Use Laplace smoothing to calculate the probabilities"""
-        unigrams_count = functools.reduce(lambda v,e: v + e['count'], self.unigrams.values(), 0)
-        num_unigrams = len(self.unigrams)
+        unigrams_count = functools.reduce(lambda v,e: v + e['count'], self.model.values(), 0)
+        num_unigrams = len(self.model)
 
-        for unigram in self.unigrams.values():
+        for unigram in self.model.values():
             unigram["p"] = (unigram["count"] + k) / (unigrams_count + k * num_unigrams)
 
         self.default_prob = {"count": 0, "p": k / (unigrams_count + k * num_unigrams)}
@@ -139,7 +135,7 @@ class WordUnigrams:
     def probability(self, unigram):
         """Get the probability of the specified unigram"""
         try:
-            return self.unigrams[unigram]["p"]
+            return self.model[unigram]["p"]
         except KeyError:
             return self.default_prob["p"]
 

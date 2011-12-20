@@ -14,6 +14,7 @@ Requirements:
     * Python 3.x
 """
 
+from probabilistic_model import ProbabilisticModel
 import functools
 import logging
 import os.path
@@ -53,56 +54,49 @@ class RotationCipher:
         return "".join([self.rotate_char(c, shift) for c in text.lower()])
 
 
-class LetterBigrams:
+class LetterBigrams(ProbabilisticModel):
     """Create letter bigrams from a word list"""
 
     def __init__(self, alphabet=ALPHABET_EN):
         self.alphabet = alphabet
-
         cwd = os.path.dirname(__file__)
         self.__words_file = os.path.join(cwd, "sowpods.txt")
         self.__words_p = os.path.join(cwd, ".words.p")
-        self.__prob_model_p = os.path.join(cwd, ".prob_letter_model.p")
 
-        if os.path.isfile(self.__words_p):
-            self.words = pickle.load(open(self.__words_p, "rb"))
-        else:
-            self.words = []
-            # TODO: get a better corpus, not just words, but real texts
-            with open(self.__words_file, "r") as f:
-                for line in iter(f.readline, ''):
-                    self.words.append(line.lower().rstrip())
-                pickle.dump(self.words, open(self.__words_p, "wb"))
-
-        if os.path.isfile(self.__prob_model_p):
-            self.bigrams = pickle.load(open(self.__prob_model_p, "rb"))
-        else:
-            self.build_probabilistic_model()
-            pickle.dump(self.bigrams, open(self.__prob_model_p, "wb"))
+        super().__init__(".prob_letter_model.p")
 
     def build_probabilistic_model(self):
         """Create letter bigrams, count their ocurrences and calculate their probabilities"""
         start_time = time.time()
 
+        if os.path.isfile(self.__words_p):
+            self.words = pickle.load(open(self.__words_p, "rb"))
+        else:
+            self.words = []
+            with open(self.__words_file, "r") as f:
+                for line in iter(f.readline, ''):
+                    self.words.append(line.lower().rstrip())
+                pickle.dump(self.words, open(self.__words_p, "wb"))
+
         words = ' '.join(self.words)
         # TODO: could make it generic, for N-grams, with itertools.permutations
-        self.bigrams = [x + y for x in self.alphabet for y in self.alphabet]
-        self.bigrams = dict([(bi, {"count": words.count(bi), "p": 0}) for bi in self.bigrams])
+        self.model = [x + y for x in self.alphabet for y in self.alphabet]
+        self.model = dict([(bi, {"count": words.count(bi), "p": 0}) for bi in self.model])
 
         self.calculate_probabilities()
         logging.debug('Built probabilistic model in: %f', (time.time() - start_time))
 
     def calculate_probabilities(self, k=1):
         """Use Laplace smoothing to calculate the probabilities"""
-        bigrams_count = functools.reduce(lambda v,e: v + e['count'], self.bigrams.values(), 0)
-        num_bigrams = len(self.bigrams)
+        bigrams_count = functools.reduce(lambda v,e: v + e['count'], self.model.values(), 0)
+        num_bigrams = len(self.model)
 
-        for bigram in self.bigrams.values():
+        for bigram in self.model.values():
             bigram["p"] = (bigram["count"] + k) / (bigrams_count + k * num_bigrams)
 
     def probability(self, bigram):
         """Get the probability of the specified bigram"""
-        return self.bigrams[bigram]["p"]
+        return self.model[bigram]["p"]
 
 
 def most_probable(phrases):
