@@ -24,7 +24,7 @@ import re
 import time
 
 # Logging level
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 
 # The text we want to reorder
@@ -150,39 +150,42 @@ class WordUnigrams:
 
 def main():
     word_model = WordUnigrams()
-    shuffled_text = ShuffledText(unigrams=word_model)
-    ordered_text = None
-    cols = len(shuffled_text.columns)
-    start = re.compile("^[A-Z][a-z]$")
+    cols = 19
+    results = []
 
-    # First column
+    # Pick admissible columns for the first one, figure out the best order for
+    # each, and choose the one with the highest probability
     for i in range(cols):
-        if start.match(shuffled_text.column(i)[0]):
-            start_col = shuffled_text.remove_column(i)
-            ordered_text = ShuffledText(columns=[start_col], cols=1, rows=8,
-                    text=None, unigrams=word_model)
-            break
+        shuffled_text = ShuffledText(unigrams=word_model)
+        start_col = shuffled_text.remove_column(i)
+        if [r for r in start_col if r.startswith(' ')]:
+            results.append((float("-inf"), None))
+            continue
 
-    for i in range(1, cols - 1):
-        best_idx = 0
-        max_p = float("-inf")
+        ordered_text = ShuffledText(columns=[start_col], cols=1, rows=8,
+                text=None, unigrams=word_model)
 
-        for c in range(len(shuffled_text.columns)):
-            ordered_text.append_column(shuffled_text.column(c))
-            temp_p = ordered_text.calculate_probability()
-            ordered_text.remove_column(i)
+        for j in range(1, cols):
+            best_idx = 0
+            max_p = float("-inf")
 
-            if temp_p > max_p:
-                best_idx = c
-                max_p = temp_p
+            for c in range(len(shuffled_text.columns)):
+                ordered_text.append_column(shuffled_text.column(c))
+                temp_p = ordered_text.calculate_probability()
+                ordered_text.remove_column(j)
 
-        logging.debug("Best probability (log(p)): %s", max_p)
-        ordered_text.append_column(shuffled_text.remove_column(best_idx))
+                if temp_p > max_p:
+                    best_idx = c
+                    max_p = temp_p
 
-    # Last column
-    ordered_text.append_column(shuffled_text.column(0))
+            logging.debug("Best probability (log(p)): %s, %d:%d", max_p, j, c)
+            ordered_text.append_column(shuffled_text.remove_column(best_idx))
 
-    print(ordered_text)
+        results.append((max_p, ordered_text))
+
+    results = sorted(results, key=lambda res: res[0], reverse=True)
+    logging.debug(results)
+    print(results[0][1])
 
 if __name__ == "__main__":
     main()
