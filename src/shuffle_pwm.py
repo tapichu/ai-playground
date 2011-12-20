@@ -37,6 +37,40 @@ TEXT = """
 """
 
 
+class ShuffledText:
+    """Represents text split into columns."""
+
+    def __init__(self, text=TEXT, cols=19, rows=8):
+        self.original_text = text
+        self.columns = []
+        self.__cols = cols
+        self.__rows = rows
+        self.process_text(text)
+
+    def process_text(self, text):
+        text = text.replace('\n', '')
+        pieces = [piece for piece in text.split("|") if piece != '']
+
+        for c in range(self.__cols):
+            self.columns.append([])
+            for r in range(self.__rows):
+                self.columns[c].append(pieces[(r * self.__cols) + c])
+
+    def column(self, n=0):
+        return self.columns[n]
+
+    def append_column(self, column):
+        self.columns.append(column)
+
+    def __str__(self):
+        string = ''
+        for r in range(self.__rows):
+            for c in range(self.__cols):
+                string += self.columns[c][r]
+            string += "\n"
+        return string
+
+
 class WordUnigrams:
     """Probabilistic model for word unigrams"""
 
@@ -78,6 +112,8 @@ class WordUnigrams:
 
 
 def main():
+    sft = ShuffledText()
+    print(sft)
     print(TEXT)
 
 if __name__ == "__main__":

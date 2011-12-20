@@ -9,6 +9,35 @@ import os.path
 
 cwd = os.path.dirname(__file__)
 
+TEST_TEXT = """
+th|is| i|s |a |
+te|st| f|or|  |
+th|is| c|la|ss|
+"""
+
+class TestSuffledText(unittest.TestCase):
+
+    def setUp(self):
+        self.st = shuffle_pwm.ShuffledText(text=TEST_TEXT, cols=5, rows=3)
+
+    def test_process_text(self):
+        self.assertEquals(self.st.columns[0], ["th", "te", "th"])
+        self.assertEquals(self.st.columns[4], ["a ", "  ", "ss"])
+
+    def test_str(self):
+        text = str(self.st)
+        self.assertEquals(text, "this is a \ntest for  \nthis class\n")
+
+    def test_column(self):
+        self.assertEquals(self.st.column(0), ["th", "te", "th"])
+        self.assertEquals(self.st.column(4), ["a ", "  ", "ss"])
+
+    def test_append_column(self):
+        column = ["  ", "  ", "s."]
+        self.st.append_column(column)
+        self.assertEquals(self.st.column(5), column)
+
+
 class TestWordUnigrams(unittest.TestCase):
 
     def setUp(self):
