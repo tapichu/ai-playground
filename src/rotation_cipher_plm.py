@@ -107,9 +107,7 @@ class LetterBigrams:
 
 def most_probable(phrases):
     bigrams = LetterBigrams()
-    best_phrase = ""
-    best_p = 0
-    second_best_p = 0
+    results = []
 
     for phrase in phrases:
         logging.debug("Phrase: %s", phrase)
@@ -121,15 +119,9 @@ def most_probable(phrases):
         probability = functools.reduce(lambda v,e: v * bigrams.probability(e), phrase_bigrams, 1)
         logging.debug("Probability: %.4e", probability)
 
-        if probability > best_p:
-            best_phrase = phrase
-            second_best_p = best_p
-            best_p = probability
-        elif probability > second_best_p:
-            second_best_p = probability
+        results.append((probability, phrase))
 
-    # TODO: return a list of (phrase, probability) sorted by their probability
-    return (best_phrase, best_p, second_best_p)
+    return sorted(results, key=lambda val: val[0], reverse=True)
 
 def main():
     # Text cleanup: remove punctuation characters, etc.
@@ -139,10 +131,10 @@ def main():
     all_phrases = (rotation_cipher.encode(text, x) for x in range(0, 26))
 
     # Figure out the probability of each possible shift
-    phrase, best_p, second_best_p = most_probable(all_phrases)
-    print("Most probable phrase: %s" % phrase)
-    print("With probability: %.4e" % best_p)
-    print("Second best probability: %.4e" % second_best_p)
+    sorted_phrases = most_probable(all_phrases)
+    print("Most probable phrase: %s" % sorted_phrases[0][1])
+    print("With probability: %.4e" % sorted_phrases[0][0])
+    print("Second best probability: %.4e" % sorted_phrases[1][0])
 
 if __name__ == "__main__":
     main()

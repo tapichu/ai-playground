@@ -91,10 +91,11 @@ of God they have decided to fight for it"
         self.phrases = [rotation_cipher.encode(encoded_phrase, x) for x in range(0, 26)]
 
     def test_most_probable(self):
-        phrase, best_p, second_best_p = rcplm.most_probable(self.phrases)
-        self.assertEqual(phrase, self.phrase.lower())
-        self.assertEqual(best_p, 2.3102527364450072e-156)
-        self.assertEqual(second_best_p, 2.7518911947067603e-214)
+        sorted_phrases = rcplm.most_probable(self.phrases)
+        self.assertEqual(len(sorted_phrases), 26)
+        self.assertEqual(sorted_phrases[0][1], self.phrase.lower())
+        self.assertEqual(sorted_phrases[0][0], 2.3102527364450072e-156)
+        self.assertEqual(sorted_phrases[1][0], 2.7518911947067603e-214)
 
 if __name__ == '__main__':
     unittest.main()

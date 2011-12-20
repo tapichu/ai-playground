@@ -152,6 +152,7 @@ def most_probable(text=TEXT, cols=19, rows=8):
     for i in range(cols):
         shuffled_text = ShuffledText(text=text, unigrams=word_model, cols=cols, rows=rows)
         start_col = shuffled_text.remove_column(i)
+        # Discard columns that have rows that start with spaces
         if [r for r in start_col if r.startswith(' ')]:
             results.append((float("-inf"), None))
             continue
@@ -160,22 +161,19 @@ def most_probable(text=TEXT, cols=19, rows=8):
                 text=None, unigrams=word_model)
 
         for j in range(1, cols):
-            best_idx = 0
-            max_p = float("-inf")
+            probabilities = []
 
             for c in range(len(shuffled_text.columns)):
                 ordered_text.append_column(shuffled_text.column(c))
                 temp_p = ordered_text.calculate_probability()
                 ordered_text.remove_column(j)
+                probabilities.append((temp_p, c))
 
-                if temp_p > max_p:
-                    best_idx = c
-                    max_p = temp_p
+            probabilities = sorted(probabilities, key=lambda val: val[0], reverse=True)
+            logging.debug("Best probability (log(p)): %s", probabilities[0][0])
+            ordered_text.append_column(shuffled_text.remove_column(probabilities[0][1]))
 
-            logging.debug("Best probability (log(p)): %s, %d:%d", max_p, j, c)
-            ordered_text.append_column(shuffled_text.remove_column(best_idx))
-
-        results.append((max_p, ordered_text))
+        results.append((ordered_text.calculate_probability(), ordered_text))
 
     return sorted(results, key=lambda res: res[0], reverse=True)
 
