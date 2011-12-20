@@ -14,7 +14,6 @@ Requirements:
     * Python 3.x
 """
 
-import collections
 import functools
 import logging
 import os.path
@@ -102,6 +101,7 @@ class WordUnigrams:
         cwd = os.path.dirname(__file__)
         self.__words_file = os.path.join(cwd, word_file)
         self.__prob_word_model_p = os.path.join(cwd, ".prob_word_model.p")
+        self.__default_prob_p = os.path.join(cwd, ".default_prob.p")
 
         self.build_probabilistic_model()
 
@@ -109,43 +109,39 @@ class WordUnigrams:
         """Create word unigrams, count their ocurrences and calculate their probabilities"""
         start_time = time.time()
 
-        # TODO: fix pickle problem (can't pickle a function)
-        #if os.path.isfile(self.__prob_word_model_p):
-            #self.unigrams = pickle.load(open(self.__prob_word_model_p, "rb"))
-        #else:
-            #self.unigrams = {}
-            #with open(self.__words_file, "r") as f:
-                #for line in iter(f.readline, ''):
-                    #parts = line.split("\t")
-                    #self.unigrams[parts[0]] = {'count': int(parts[1]), 'p': 0}
-                #self.calculate_probabilities()
-                #pickle.dump(self.unigrams, open(self.__prob_word_model_p, "wb"))
+        if os.path.isfile(self.__prob_word_model_p):
+            self.unigrams = pickle.load(open(self.__prob_word_model_p, "rb"))
+        else:
+            self.unigrams = {}
+            with open(self.__words_file, "r") as f:
+                for line in iter(f.readline, ''):
+                    parts = line.split("\t")
+                    self.unigrams[parts[0]] = {'count': int(parts[1]), 'p': 0}
+                self.calculate_probabilities()
+                pickle.dump(self.unigrams, open(self.__prob_word_model_p, "wb"))
 
-        self.unigrams = {}
-        with open(self.__words_file, "r") as f:
-            for line in iter(f.readline, ''):
-                parts = line.split("\t")
-                self.unigrams[parts[0]] = {'count': int(parts[1]), 'p': 0}
-            self.calculate_probabilities()
+        if os.path.isfile(self.__default_prob_p):
+            self.default_prob = pickle.load(open(self.__default_prob_p, "rb"))
 
         logging.debug('Built probabilistic model in: %f', (time.time() - start_time))
 
     def calculate_probabilities(self, k=1):
         """Use Laplace smoothing to calculate the probabilities"""
-        self.unigrams_count = functools.reduce(lambda v,e: v + e['count'], self.unigrams.values(), 0)
+        unigrams_count = functools.reduce(lambda v,e: v + e['count'], self.unigrams.values(), 0)
         num_unigrams = len(self.unigrams)
 
         for unigram in self.unigrams.values():
-            unigram["p"] = (unigram["count"] + k) / (self.unigrams_count + k * num_unigrams)
+            unigram["p"] = (unigram["count"] + k) / (unigrams_count + k * num_unigrams)
 
-        def default_p():
-            return {"count": 0, "p": k / (self.unigrams_count + k * num_unigrams)}
-
-        self.unigrams = collections.defaultdict(default_p, self.unigrams)
+        self.default_prob = {"count": 0, "p": k / (unigrams_count + k * num_unigrams)}
+        pickle.dump(self.default_prob, open(self.__default_prob_p, "wb"))
 
     def probability(self, unigram):
         """Get the probability of the specified unigram"""
-        return self.unigrams[unigram]["p"]
+        try:
+            return self.unigrams[unigram]["p"]
+        except KeyError:
+            return self.default_prob["p"]
 
 
 def main():
