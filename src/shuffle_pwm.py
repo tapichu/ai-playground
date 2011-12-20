@@ -18,6 +18,7 @@ import collections
 import functools
 import logging
 import os.path
+import math
 import pickle
 import re
 import time
@@ -75,12 +76,14 @@ class ShuffledText:
         return column
 
     def calculate_probability(self):
-        text = str(self).replace('\n', '')
+        text = str(self).replace('\n', ' ')
         text = re.sub("[^a-z ]", "", text.lower())
         words = text.split(' ')
 
-        probability = functools.reduce(lambda v,w: v * self.unigrams.probability(w), words, 1)
-        logging.debug("Probability: %.4e", probability)
+        # Use logs, the probabilities are quite small
+        probability = functools.reduce(
+                lambda v,w: v + math.log(self.unigrams.probability(w)), words, 0)
+        logging.debug("Probability: %f", probability)
         return probability
 
     def __str__(self):
