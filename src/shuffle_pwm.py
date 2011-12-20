@@ -149,7 +149,40 @@ class WordUnigrams:
 
 
 def main():
-    start_text = ShuffledText()
+    word_model = WordUnigrams()
+    shuffled_text = ShuffledText(unigrams=word_model)
+    ordered_text = None
+    cols = len(shuffled_text.columns)
+    start = re.compile("^[A-Z][a-z]$")
+
+    # First column
+    for i in range(cols):
+        if start.match(shuffled_text.column(i)[0]):
+            start_col = shuffled_text.remove_column(i)
+            ordered_text = ShuffledText(columns=[start_col], cols=1, rows=8,
+                    text=None, unigrams=word_model)
+            break
+
+    for i in range(1, cols - 1):
+        best_idx = 0
+        max_p = float("-inf")
+
+        for c in range(len(shuffled_text.columns)):
+            ordered_text.append_column(shuffled_text.column(c))
+            temp_p = ordered_text.calculate_probability()
+            ordered_text.remove_column(i)
+
+            if temp_p > max_p:
+                best_idx = c
+                max_p = temp_p
+
+        logging.debug("Best probability (log(p)): %s", max_p)
+        ordered_text.append_column(shuffled_text.remove_column(best_idx))
+
+    # Last column
+    ordered_text.append_column(shuffled_text.column(0))
+
+    print(ordered_text)
 
 if __name__ == "__main__":
     main()
